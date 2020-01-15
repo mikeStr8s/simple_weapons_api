@@ -120,7 +120,7 @@ func Create(ctx *fasthttp.RequestCtx) {
 // ReadJSONFile reads the contents of a JSON file and returns an
 // array of bytes of file data to be parsed into data object
 func ReadJSONFile(dataset string) []byte {
-	file, err := os.Open(path.Join(currentDir, "data/"+dataset+".json"))
+	file, err := os.Open(dataset + ".json")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -230,7 +230,7 @@ func Contains(list []string, term string) int {
 }
 
 func WriteJSONData(dataset string, byteData []byte) {
-	ioutil.WriteFile("data/"+dataset+".json", byteData, 0644)
+	ioutil.WriteFile(dataset+".json", byteData, 0644)
 }
 
 func PostData(dataset string, byteData []byte) interface{} {
