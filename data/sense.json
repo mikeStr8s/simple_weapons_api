@@ -1,0 +1,7 @@
+[
+  { "id": 1, "name": "Blindsight" },
+  { "id": 2, "name": "Darkvision" },
+  { "id": 3, "name": "Truesight" },
+  { "id": 4, "name": "Tremorsense" },
+  { "id": 5, "name": "Passive Perception" }
+]

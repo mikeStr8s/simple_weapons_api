@@ -1,0 +1,25 @@
+[
+  {
+    "id": 1,
+    "name": "Owlbear",
+    "hitpoints": "59 (7d10 + 21)",
+    "armorclass": "13 Natural Armor",
+    "STR": 20,
+    "DEX": 12,
+    "CON": 17,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 7,
+    "challenge": 3,
+    "traits": "***Keen Sight and Smell.*** The owlbear has advantage on Wisdom (__Perception__) checks that rely on sight or smell.",
+    "actions": "***Multiattack.*** The owlbear makes two attacks: one with its beak and one with its claws.\n\n***Beak.*** *Melee Weapon Attack:* +7 to hit, reach 5 ft., one creature. *Hit:* 10 (1d10 + 5) piercing damage.\n\n***Claws.*** *Melee Weapon Damage:* +7 to hit, reach 5 ft., one target. *Hit:* 14 (2d8 + 5) slashing damage.",
+    "legendaryactions": "",
+    "reactions": "",
+    "related": {
+      "movementspeed": [1],
+      "savingthrow": [1],
+      "skillvalue": [1],
+      "sensevalue": [1]
+    }
+  }
+]

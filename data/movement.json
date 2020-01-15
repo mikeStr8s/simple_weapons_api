@@ -1,0 +1,8 @@
+[
+  { "id": 1, "name": "Climbing" },
+  { "id": 2, "name": "Swimming" },
+  { "id": 3, "name": "Crawling" },
+  { "id": 4, "name": "Flying" },
+  { "id": 5, "name": "Burrowing" },
+  { "id": 6, "name": "Base" }
+]

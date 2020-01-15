@@ -1,0 +1,18 @@
+[
+  { "id": 1, "name": "Common" },
+  { "id": 2, "name": "Dwarvish" },
+  { "id": 3, "name": "Elvish" },
+  { "id": 4, "name": "Giant" },
+  { "id": 5, "name": "Gnomish" },
+  { "id": 6, "name": "Goblin" },
+  { "id": 7, "name": "Halfling" },
+  { "id": 8, "name": "Orc" },
+  { "id": 9, "name": "Abyssal" },
+  { "id": 10, "name": "Celestial" },
+  { "id": 11, "name": "Draconic" },
+  { "id": 12, "name": "Deep Speech" },
+  { "id": 13, "name": "Infernal" },
+  { "id": 14, "name": "Primordial" },
+  { "id": 15, "name": "Sylvan" },
+  { "id": 16, "name": "Undercommon" }
+]

@@ -1,0 +1,17 @@
+[
+  { "id": 1, "name": "Blinded" },
+  { "id": 2, "name": "Charmed" },
+  { "id": 3, "name": "Deafened" },
+  { "id": 4, "name": "Exhaustion" },
+  { "id": 5, "name": "Frightened" },
+  { "id": 6, "name": "Grappled" },
+  { "id": 7, "name": "Icapacitated" },
+  { "id": 8, "name": "Invisible" },
+  { "id": 9, "name": "Paralyzed" },
+  { "id": 10, "name": "Petrified" },
+  { "id": 11, "name": "Poisoned" },
+  { "id": 12, "name": "Prone" },
+  { "id": 13, "name": "Restrained" },
+  { "id": 14, "name": "Stunned" },
+  { "id": 15, "name": "Unconcious" }
+]

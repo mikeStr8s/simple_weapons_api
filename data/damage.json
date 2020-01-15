@@ -1,0 +1,15 @@
+[
+  { "id": 1, "name": "Acid" },
+  { "id": 2, "name": "Bludgeoning" },
+  { "id": 3, "name": "Cold" },
+  { "id": 4, "name": "Fire" },
+  { "id": 5, "name": "Force" },
+  { "id": 6, "name": "Lightning" },
+  { "id": 7, "name": "Necrotic" },
+  { "id": 8, "name": "Peircing" },
+  { "id": 9, "name": "Poison" },
+  { "id": 10, "name": "Psychic" },
+  { "id": 11, "name": "Radiant" },
+  { "id": 12, "name": "Slashing" },
+  { "id": 13, "name": "Thunder" }
+]
