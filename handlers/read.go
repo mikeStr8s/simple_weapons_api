@@ -1,32 +1,12 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
 	"path"
 	"sort"
 
-	"github.com/fasthttp/router"
+	"github.com/mikeStr8s/simple_weapons_api/util"
 	"github.com/valyala/fasthttp"
-)
-
-var (
-	currentDir, _ = os.Getwd()
-	// RELATED is a mapping of relational data to it's base lookup
-	RELATED = map[string]string{
-		"movementspeed": "movement",
-		"savingthrow":   "abilityscore",
-		"skillvalue":    "skill",
-		"sensevalue":    "sense",
-	}
-)
-
-const (
-	// MONSTER is a constant with value Monster for global use to avoid naked strings
-	MONSTER = "monster"
 )
 
 // LookupRecord is a struct that represents the common shape of the JSON data used for simple lookup datasets.
@@ -90,51 +70,20 @@ type MonsterRecord struct {
 	Related          map[string][]RelationalRecord `json:"related"`
 }
 
-// Index is the base landing for routing
-func Index(ctx *fasthttp.RequestCtx) {
-	fmt.Fprint(ctx, "Welcome!\n")
-}
-
-// SetResponse takes a context pointer and assignes the response context data for the API
-func SetResponse(ctx *fasthttp.RequestCtx) {
-	ctx.Response.Header.SetCanonical([]byte("Content-Type"), []byte("application/json"))
-	ctx.Response.SetStatusCode(200)
-}
-
 // Lookup is a dynamic handler for lookup datasets
 func Lookup(ctx *fasthttp.RequestCtx) {
-	SetResponse(ctx)
+	util.SetResponse(ctx)
 	if err := json.NewEncoder(ctx).Encode(GetData(path.Base(string(ctx.Path())))); err != nil {
 		ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
 	}
 }
 
-// Create is a dynamic handler for POST requests
-func Create(ctx *fasthttp.RequestCtx) {
-	SetResponse(ctx)
-	if err := json.NewEncoder(ctx).Encode(PostData(path.Base(string(ctx.Path())), ctx.PostBody())); err != nil {
-		ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
-	}
-}
-
-// ReadJSONFile reads the contents of a JSON file and returns an
-// array of bytes of file data to be parsed into data object
-func ReadJSONFile(dataset string) []byte {
-	file, err := os.Open(dataset + ".json")
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer file.Close()
-	bytes, _ := ioutil.ReadAll(file)
-	return bytes
-}
-
 // GetData gets the data in the file represented by the supplied dataset
 func GetData(dataset string) interface{} {
-	fileData := ReadJSONFile(dataset) // Raw byte array of specified dataset from file
-	if dataset == MONSTER {
+	fileData := util.ReadJSONFile(dataset) // Raw byte array of specified dataset from file
+	if dataset == util.MONSTER {
 		return ParseMonster(fileData)
-	} else if lookupDataset, ok := RELATED[dataset]; ok {
+	} else if lookupDataset, ok := util.RELATED[dataset]; ok {
 		return ParseRelational(fileData, lookupDataset)
 	}
 	return ParseLookup(fileData)
@@ -154,8 +103,8 @@ func ParseRelational(byteData []byte, lookupDataset string) []RelationalRecord {
 	var rawRelationalData []RawRelationalRecord  // Instantiate empty array of RawRelationalRecords
 	json.Unmarshal(byteData, &rawRelationalData) // Parse JSON data into empty array
 
-	var relationalData []RelationalRecord                  // Instantiate empty final array of RelationalRecords
-	lookupData := ParseLookup(ReadJSONFile(lookupDataset)) // Get array of LookupRecords for related dataset
+	var relationalData []RelationalRecord                       // Instantiate empty final array of RelationalRecords
+	lookupData := ParseLookup(util.ReadJSONFile(lookupDataset)) // Get array of LookupRecords for related dataset
 	for _, rawRelationalRecord := range rawRelationalData {
 		var lookupRecord LookupRecord
 		for _, lr := range lookupData {
@@ -202,7 +151,7 @@ func ParseMonster(byteData []byte) []MonsterRecord {
 		}
 
 		for relationalDataset, ids := range rawMonsterRecord.Related {
-			relationalData := ParseRelational(ReadJSONFile(relationalDataset), RELATED[relationalDataset])
+			relationalData := ParseRelational(util.ReadJSONFile(relationalDataset), util.RELATED[relationalDataset])
 			rIDs := ids
 			sort.Slice(rIDs, func(i int, j int) bool { return rIDs[i] < rIDs[j] })
 			for _, relationalRecord := range relationalData {
@@ -215,76 +164,4 @@ func ParseMonster(byteData []byte) []MonsterRecord {
 		monsterData = append(monsterData, monsterRecord)
 	}
 	return monsterData
-}
-
-// Contains checks a list of strings to see if the supplied
-// term exists in the array. If it exists the index of the
-// term is returned, otherwise -1
-func Contains(list []string, term string) int {
-	for idx, item := range list {
-		if item == term {
-			return idx
-		}
-	}
-	return -1
-}
-
-func WriteJSONData(dataset string, byteData []byte) {
-	ioutil.WriteFile(dataset+".json", byteData, 0644)
-}
-
-func PostData(dataset string, byteData []byte) interface{} {
-	if dataset == MONSTER {
-
-	} else if lookupDataset, ok := RELATED[dataset]; ok {
-		return CreateRelational(dataset, lookupDataset, byteData)
-	}
-	println(dataset)
-	return byteData
-}
-
-func CreateRelational(dataset string, lookupDataset string, byteData []byte) RelationalRecord {
-	var rawRelationalRecord RawRelationalRecord
-	json.Unmarshal(byteData, &rawRelationalRecord)
-
-	lookupData := ParseLookup(ReadJSONFile(lookupDataset))
-	for _, lookupRecord := range lookupData {
-		if lookupRecord.ID == rawRelationalRecord.Related {
-			relationalData := ParseRelational(ReadJSONFile(dataset), lookupDataset)
-			sort.Slice(relationalData, func(i, j int) bool { return relationalData[i].ID < relationalData[j].ID })
-			relationalRecord := RelationalRecord{relationalData[len(relationalData)-1].ID + 1, rawRelationalRecord.Value, lookupRecord}
-			relationalData = append(relationalData, relationalRecord)
-			relationalJSON, _ := json.Marshal(relationalData)
-			WriteJSONData(dataset, relationalJSON)
-			return relationalRecord
-		}
-	}
-	return RelationalRecord{999999, "Problem encountered, no data was Added", LookupRecord{10, "Related ID does not reference existing entry"}}
-}
-
-func main() {
-	router := router.New()
-	router.GET("/", Index)
-
-	api := router.Group("/api")
-	api.GET("/abilityscore", Lookup)
-	api.GET("/condition", Lookup)
-	api.GET("/damage", Lookup)
-	api.GET("/language", Lookup)
-	api.GET("/movement", Lookup)
-	api.GET("/sense", Lookup)
-	api.GET("/skill", Lookup)
-	api.GET("/movementspeed", Lookup)
-	api.GET("/savingthrow", Lookup)
-	api.GET("/sensevalue", Lookup)
-	api.GET("/skillvalue", Lookup)
-	api.GET("/monster", Lookup)
-
-	api.POST("/movementspeed", Create)
-	api.POST("/skillvalue", Create)
-	api.POST("/savingthrow", Create)
-	api.POST("/sensevalue", Create)
-	api.POST("/monster", Create)
-
-	log.Fatal(fasthttp.ListenAndServe(":1234", router.Handler))
 }
