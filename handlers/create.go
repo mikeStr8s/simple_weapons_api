@@ -22,7 +22,7 @@ func Create(ctx *fasthttp.RequestCtx) {
 // the byte data to the correct handler
 func PostData(dataset string, byteData []byte) interface{} {
 	if dataset == util.MONSTER {
-
+		return CreateMonster(dataset, byteData)
 	}
 	lookupDataset, _ := util.RELATED[dataset]
 	return CreateRelational(dataset, lookupDataset, byteData)
@@ -53,4 +53,22 @@ func CreateRelational(dataset string, lookupDataset string, byteData []byte) Rel
 		}
 	}
 	return RelationalRecord{999999, "Problem encountered, no data was Added", LookupRecord{10, "Related ID does not reference existing entry"}}
+}
+
+// CreateMonster enters a new monster data entry into the database.
+func CreateMonster(dataset string, byteData []byte) MonsterRecord {
+	var rawMonsterRecord RawMonsterRecord
+	json.Unmarshal(byteData, &rawMonsterRecord)
+
+	var rawMonsterData []RawMonsterRecord
+	json.Unmarshal(util.ReadJSONFile(dataset), &rawMonsterData)
+
+	sort.Slice(rawMonsterData, func(i, j int) bool { return rawMonsterData[i].ID > rawMonsterData[j].ID })
+	rawMonsterRecord.ID = rawMonsterData[0].ID + 1
+	monsterJSON, _ := json.Marshal(append(rawMonsterData, rawMonsterRecord))
+	WriteJSONData(dataset, monsterJSON)
+
+	monsterData := ParseMonster(util.ReadJSONFile(dataset))
+	sort.Slice(monsterData, func(i, j int) bool { return monsterData[i].ID > monsterData[j].ID })
+	return monsterData[0]
 }
