@@ -22,6 +22,22 @@ type RawRelationalRecord struct {
 	Related int    `json:"related"`
 }
 
+func (rrr *RawRelationalRecord) convertRelationalRecord(lookupData []LookupRecord) RelationalRecord {
+	var lookupRecord LookupRecord
+	for _, lr := range lookupData {
+		if lr.ID == rrr.Related {
+			lookupRecord = lr // Identify and save related LookupRecord
+		}
+	}
+
+	// Create final RelationalRecord and add to final array
+	var relationalRecord RelationalRecord
+	relationalRecord.ID = rrr.ID
+	relationalRecord.Value = rrr.Value
+	relationalRecord.Related = lookupRecord
+	return relationalRecord
+}
+
 // RelationalRecord is a struct that represents the common shape of the JSON data for relational datasets
 // with a parsed lookup related reference
 type RelationalRecord struct {
@@ -53,8 +69,22 @@ type RawMonsterRecord struct {
 // convertMonsterRecord converts a raw monster record to a standard monster record
 // and returns that struct lacking the parsed related data.
 func (rmr *RawMonsterRecord) convertMonsterRecord() MonsterRecord {
-	return MonsterRecord{rmr.ID, rmr.Name, rmr.HitPoints, rmr.ArmorClass, rmr.STR, rmr.DEX, rmr.CON, rmr.INT, rmr.WIS, rmr.CHA,
+	monsterRecord := MonsterRecord{rmr.ID, rmr.Name, rmr.HitPoints, rmr.ArmorClass, rmr.STR, rmr.DEX, rmr.CON, rmr.INT, rmr.WIS, rmr.CHA,
 		rmr.Challenge, rmr.Traits, rmr.Actions, rmr.LegendaryActions, rmr.Reactions, map[string][]RelationalRecord{}}
+
+	for relationalDataset, ids := range rmr.Related {
+		relationalData := ParseRelational(util.ReadJSONFile(relationalDataset), util.RELATED[relationalDataset])
+		rIDs := ids
+		sort.Slice(rIDs, func(i int, j int) bool { return rIDs[i] < rIDs[j] })
+		for _, relationalRecord := range relationalData {
+			if len(rIDs) > 0 && rIDs[0] == relationalRecord.ID {
+				monsterRecord.Related[relationalDataset] = append(monsterRecord.Related[relationalDataset], relationalRecord)
+				_, rIDs = rIDs[0], rIDs[1:]
+			}
+		}
+	}
+
+	return monsterRecord
 }
 
 // MonsterRecord is a struct representing the data structure of Monsters
@@ -113,18 +143,7 @@ func ParseRelational(byteData []byte, lookupDataset string) []RelationalRecord {
 	var relationalData []RelationalRecord                       // Instantiate empty final array of RelationalRecords
 	lookupData := ParseLookup(util.ReadJSONFile(lookupDataset)) // Get array of LookupRecords for related dataset
 	for _, rawRelationalRecord := range rawRelationalData {
-		var lookupRecord LookupRecord
-		for _, lr := range lookupData {
-			if lr.ID == rawRelationalRecord.Related {
-				lookupRecord = lr // Identify and save related LookupRecord
-			}
-		}
-
-		// Create final RelationalRecord and add to final array
-		var relationalRecord RelationalRecord
-		relationalRecord.ID = rawRelationalRecord.ID
-		relationalRecord.Value = rawRelationalRecord.Value
-		relationalRecord.Related = lookupRecord
+		relationalRecord := rawRelationalRecord.convertRelationalRecord(lookupData)
 		relationalData = append(relationalData, relationalRecord)
 	}
 	return relationalData
@@ -139,18 +158,6 @@ func ParseMonster(byteData []byte) []MonsterRecord {
 	var monsterData []MonsterRecord
 	for _, rawMonsterRecord := range rawMonsterData {
 		monsterRecord := rawMonsterRecord.convertMonsterRecord()
-
-		for relationalDataset, ids := range rawMonsterRecord.Related {
-			relationalData := ParseRelational(util.ReadJSONFile(relationalDataset), util.RELATED[relationalDataset])
-			rIDs := ids
-			sort.Slice(rIDs, func(i int, j int) bool { return rIDs[i] < rIDs[j] })
-			for _, relationalRecord := range relationalData {
-				if len(rIDs) > 0 && rIDs[0] == relationalRecord.ID {
-					monsterRecord.Related[relationalDataset] = append(monsterRecord.Related[relationalDataset], relationalRecord)
-					_, rIDs = rIDs[0], rIDs[1:]
-				}
-			}
-		}
 		monsterData = append(monsterData, monsterRecord)
 	}
 	return monsterData
