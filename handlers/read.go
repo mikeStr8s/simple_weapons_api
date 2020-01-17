@@ -50,6 +50,13 @@ type RawMonsterRecord struct {
 	Related          map[string][]int `json:"related"`
 }
 
+// convertMonsterRecord converts a raw monster record to a standard monster record
+// and returns that struct lacking the parsed related data.
+func (rmr *RawMonsterRecord) convertMonsterRecord() MonsterRecord {
+	return MonsterRecord{rmr.ID, rmr.Name, rmr.HitPoints, rmr.ArmorClass, rmr.STR, rmr.DEX, rmr.CON, rmr.INT, rmr.WIS, rmr.CHA,
+		rmr.Challenge, rmr.Traits, rmr.Actions, rmr.LegendaryActions, rmr.Reactions, map[string][]RelationalRecord{}}
+}
+
 // MonsterRecord is a struct representing the data structure of Monsters
 type MonsterRecord struct {
 	ID               int                           `json:"id"`
@@ -131,24 +138,7 @@ func ParseMonster(byteData []byte) []MonsterRecord {
 
 	var monsterData []MonsterRecord
 	for _, rawMonsterRecord := range rawMonsterData {
-		monsterRecord := MonsterRecord{
-			rawMonsterRecord.ID,
-			rawMonsterRecord.Name,
-			rawMonsterRecord.HitPoints,
-			rawMonsterRecord.ArmorClass,
-			rawMonsterRecord.STR,
-			rawMonsterRecord.DEX,
-			rawMonsterRecord.CON,
-			rawMonsterRecord.INT,
-			rawMonsterRecord.WIS,
-			rawMonsterRecord.CHA,
-			rawMonsterRecord.Challenge,
-			rawMonsterRecord.Traits,
-			rawMonsterRecord.Actions,
-			rawMonsterRecord.LegendaryActions,
-			rawMonsterRecord.Reactions,
-			map[string][]RelationalRecord{},
-		}
+		monsterRecord := rawMonsterRecord.convertMonsterRecord()
 
 		for relationalDataset, ids := range rawMonsterRecord.Related {
 			relationalData := ParseRelational(util.ReadJSONFile(relationalDataset), util.RELATED[relationalDataset])
