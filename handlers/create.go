@@ -23,11 +23,9 @@ func Create(ctx *fasthttp.RequestCtx) {
 func PostData(dataset string, byteData []byte) interface{} {
 	if dataset == util.MONSTER {
 
-	} else if lookupDataset, ok := util.RELATED[dataset]; ok {
-		return CreateRelational(dataset, lookupDataset, byteData)
 	}
-	println(dataset)
-	return byteData
+	lookupDataset, _ := util.RELATED[dataset]
+	return CreateRelational(dataset, lookupDataset, byteData)
 }
 
 // WriteJSONData writes the byte data to the specified dataset
