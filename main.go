@@ -6,6 +6,7 @@ import (
 
 	"github.com/fasthttp/router"
 	"github.com/mikeStr8s/simple_weapons_api/handlers"
+	"github.com/mikeStr8s/simple_weapons_api/middleware"
 	"github.com/valyala/fasthttp"
 )
 
@@ -17,6 +18,7 @@ func Index(ctx *fasthttp.RequestCtx) {
 func main() {
 	router := router.New()
 	router.GET("/", Index)
+	router.POST("/register", handlers.Register)
 
 	api := router.Group("/api")
 	api.GET("/abilityscore", handlers.Lookup)
@@ -25,7 +27,7 @@ func main() {
 	api.GET("/language", handlers.Lookup)
 	api.GET("/movement", handlers.Lookup)
 	api.GET("/sense", handlers.Lookup)
-	api.GET("/skill", handlers.Lookup)
+	api.GET("/skill", middleware.Auth(handlers.Lookup))
 	api.GET("/movementspeed", handlers.Lookup)
 	api.GET("/savingthrow", handlers.Lookup)
 	api.GET("/sensevalue", handlers.Lookup)
