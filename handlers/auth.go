@@ -8,16 +8,20 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+// Register is the registration handler to create an account
+// to allow the user to traverse the API through the auth middleware
 func Register(ctx *fasthttp.RequestCtx) {
-	util.SetResponse(ctx)
-
-	tokenData := map[string]string{}
+	// If there is unique username, create the new user and return the login token
+	// Else return 409 because account with username already exists
 	if userData, exists := userExists(ctx.PostBody()); !exists {
 		newUser := createUser(userData)
-		tokenData["token"] = newUser["token"]
+		util.SetResponse(ctx)
+		if err := json.NewEncoder(ctx).Encode(newUser); err != nil {
+			ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+		}
+	} else {
+		ctx.Response.SetStatusCode(409)
 	}
-
-	ctx.Response.Header.Set("simple-weapons", tokenData["token"]) // TODO: add auth token instead of ""
 }
 
 func userExists(byteData []byte) (postBody map[string]string, exists bool) {

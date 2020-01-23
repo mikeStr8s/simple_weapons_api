@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -18,11 +17,7 @@ func SetResponse(ctx *fasthttp.RequestCtx) {
 // ReadJSONFile reads the contents of a JSON file and returns an
 // array of bytes of file data to be parsed into data object
 func ReadJSONFile(dataset string) []byte {
-	file, err := os.Open(path.Join(DIRNAME, "data", dataset+".json"))
-	println(DIRNAME)
-	if err != nil {
-		fmt.Println(err)
-	}
+	file, _ := os.Open(path.Join(DIRNAME, "data", dataset+".json"))
 	defer file.Close()
 	bytes, _ := ioutil.ReadAll(file)
 	return bytes
