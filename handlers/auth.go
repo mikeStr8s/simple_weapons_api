@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"strings"
 
 	scrypt "github.com/elithrar/simple-scrypt"
 	"github.com/mikeStr8s/simple_weapons_api/util"
@@ -39,16 +41,16 @@ func userExists(byteData []byte) (postBody map[string]string, exists bool) {
 }
 
 func createUser(postData map[string]string) map[string]string {
-	username := postData["username"]
-	password, _ := scrypt.GenerateFromPassword([]byte(postData["password"]), scrypt.DefaultParams)
+	authHash, _ := scrypt.GenerateFromPassword([]byte(postData["password"]), scrypt.DefaultParams)
 
 	userByteData := util.ReadJSONFile("user")
 	var userData map[string]string
 	json.Unmarshal(userByteData, &userData)
 
-	userData[username] = string(password)
+	userData[postData["username"]] = string(authHash)
 	userJSON, _ := json.Marshal(userData)
 	WriteJSONData("user", userJSON)
 
-	return map[string]string{"token": string(password)}
+	token := base64.StdEncoding.EncodeToString([]byte(strings.Join([]string{postData["username"], postData["password"]}, ":")))
+	return map[string]string{"token": string(token)}
 }
