@@ -1,9 +1,8 @@
 package util
 
-import "os"
 
 var (
-	DIRNAME, _ = os.Getwd()
+	DIRNAME = "/root/go/src/github.com/mikeStr8s/simple_weapons_api"
 	// RELATED is a mapping of relational data to it's base lookup
 	RELATED = map[string]string{
 		"movementspeed": "movement",
