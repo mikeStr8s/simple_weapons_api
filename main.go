@@ -6,6 +6,7 @@ import (
 
 	"github.com/fasthttp/router"
 	"github.com/mikeStr8s/simple_weapons_api/handlers"
+	"github.com/mikeStr8s/simple_weapons_api/middleware"
 	"github.com/valyala/fasthttp"
 )
 
@@ -17,26 +18,27 @@ func Index(ctx *fasthttp.RequestCtx) {
 func main() {
 	router := router.New()
 	router.GET("/", Index)
+	router.POST("/register", handlers.Register)
 
 	api := router.Group("/api")
-	api.GET("/abilityscore", handlers.Lookup)
-	api.GET("/condition", handlers.Lookup)
-	api.GET("/damage", handlers.Lookup)
-	api.GET("/language", handlers.Lookup)
-	api.GET("/movement", handlers.Lookup)
-	api.GET("/sense", handlers.Lookup)
-	api.GET("/skill", handlers.Lookup)
-	api.GET("/movementspeed", handlers.Lookup)
-	api.GET("/savingthrow", handlers.Lookup)
-	api.GET("/sensevalue", handlers.Lookup)
-	api.GET("/skillvalue", handlers.Lookup)
-	api.GET("/monster", handlers.Lookup)
+	api.GET("/abilityscore", middleware.Auth(handlers.Lookup))
+	api.GET("/condition", middleware.Auth(handlers.Lookup))
+	api.GET("/damage", middleware.Auth(handlers.Lookup))
+	api.GET("/language", middleware.Auth(handlers.Lookup))
+	api.GET("/movement", middleware.Auth(handlers.Lookup))
+	api.GET("/sense", middleware.Auth(handlers.Lookup))
+	api.GET("/skill", middleware.Auth(handlers.Lookup))
+	api.GET("/movementspeed", middleware.Auth(handlers.Lookup))
+	api.GET("/savingthrow", middleware.Auth(handlers.Lookup))
+	api.GET("/sensevalue", middleware.Auth(handlers.Lookup))
+	api.GET("/skillvalue", middleware.Auth(handlers.Lookup))
+	api.GET("/monster", middleware.Auth(handlers.Lookup))
 
-	api.POST("/movementspeed", handlers.Create)
-	api.POST("/skillvalue", handlers.Create)
-	api.POST("/savingthrow", handlers.Create)
-	api.POST("/sensevalue", handlers.Create)
-	api.POST("/monster", handlers.Create)
+	api.POST("/movementspeed", middleware.Auth(handlers.Create))
+	api.POST("/skillvalue", middleware.Auth(handlers.Create))
+	api.POST("/savingthrow", middleware.Auth(handlers.Create))
+	api.POST("/sensevalue", middleware.Auth(handlers.Create))
+	api.POST("/monster", middleware.Auth(handlers.Create))
 
 	log.Fatal(fasthttp.ListenAndServe(":1234", router.Handler))
 }
