@@ -26,6 +26,23 @@ func Register(ctx *fasthttp.RequestCtx) {
 	}
 }
 
+// Login allows returning users to get their auth token
+// to login to the applications REST functions
+func Login(ctx *fasthttp.RequestCtx) {
+	if _, exists := userExists(ctx.PostBody()); exists {
+		var postData map[string]string
+		json.Unmarshal(ctx.PostBody(), &postData)
+
+		token := base64.StdEncoding.EncodeToString([]byte(strings.Join([]string{postData["username"], postData["password"]}, ":")))
+		util.SetResponse(ctx)
+		if err := json.NewEncoder(ctx).Encode(map[string]string{"token": string(token)}); err != nil {
+			ctx.Error(err.Error(), fasthttp.StatusInternalServerError)
+		}
+	} else {
+		ctx.Response.SetStatusCode(401)
+	}
+}
+
 func userExists(byteData []byte) (postBody map[string]string, exists bool) {
 	var postData map[string]string
 	json.Unmarshal(byteData, &postData)

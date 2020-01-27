@@ -19,6 +19,7 @@ func main() {
 	router := router.New()
 	router.GET("/", Index)
 	router.POST("/register", handlers.Register)
+	router.POST("/login", handlers.Login)
 
 	api := router.Group("/api")
 	api.GET("/abilityscore", middleware.Auth(handlers.Lookup))
